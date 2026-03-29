@@ -124,12 +124,7 @@ def base_opts():
         "buffersize": 1024 * 16,
         "http_chunk_size": 1024 * 1024 * 10,
     }
-    for browser in ("chrome", "firefox", "edge", "brave"):
-        try:
-            opts["cookiesfrombrowser"] = (browser,)
-            break
-        except Exception:
-            continue
+    opts["extractor_args"] = {"youtube": {"player_client": ["default"]}}
     if FFMPEG_PATH:
         opts["ffmpeg_location"] = os.path.dirname(FFMPEG_PATH) if os.path.isfile(FFMPEG_PATH) else None
     return opts
