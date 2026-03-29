@@ -18,6 +18,15 @@ APP_EXE = os.path.abspath(sys.argv[0])
 def cls():
     os.system("cls" if os.name == "nt" else "clear")
 
+def getch():
+    """Đọc 1 phím bấm, không cần Enter"""
+    try:
+        import msvcrt
+        ch = msvcrt.getch()
+        return ch.decode("utf-8", errors="ignore")
+    except Exception:
+        return input()
+
 import yt_dlp
 
 # ── Tự động cập nhật app qua GitHub Releases ────────────────────────────────
@@ -193,7 +202,8 @@ def input_links(action, folder):
 
     while True:
         show_queue_menu(queue, folder)
-        choice = input("\nChọn: ").strip()
+        print("\nChọn: ", end="", flush=True)
+        choice = getch().strip()
 
         if choice == "0":
             break
@@ -268,7 +278,8 @@ def main():
 
     while True:
         show_main_menu(config)
-        choice = input("Chọn: ").strip()
+        print("Chọn: ", end="", flush=True)
+        choice = getch().strip()
 
         if choice == "1":
             input_links(download_video, config["video_folder"])
