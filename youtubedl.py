@@ -5,6 +5,7 @@ import json
 import subprocess
 import shutil
 import urllib.request
+import threading
 
 # ── Version & GitHub ─────────────────────────────────────────────────────────
 APP_VERSION = "1.0.0"
@@ -72,7 +73,8 @@ del "%~f0"
     except Exception:
         pass  # không có mạng hoặc lỗi → bỏ qua, chạy bình thường
 
-check_app_update()
+# Chạy update ngầm, không block khởi động
+threading.Thread(target=check_app_update, daemon=True).start()
 
 # ── Tự động cập nhật yt-dlp ─────────────────────────────────────────────────
 def ensure_ytdlp():
@@ -87,7 +89,7 @@ def ensure_ytdlp():
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-U", "yt-dlp", "-q"],
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-ensure_ytdlp()
+threading.Thread(target=ensure_ytdlp, daemon=True).start()
 
 # ── Tìm ffmpeg (bundled trong exe hoặc trong PATH) ───────────────────────────
 def find_ffmpeg():
