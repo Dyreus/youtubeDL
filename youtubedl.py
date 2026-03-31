@@ -8,7 +8,7 @@ import urllib.request
 import threading
 
 # ── Version & GitHub ─────────────────────────────────────────────────────────
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.2"
 GITHUB_REPO = "Dyreus/youtubeDL"
 GITHUB_API  = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 
@@ -68,7 +68,7 @@ del "%~f0"
 """)
         subprocess.Popen(["cmd", "/c", bat], creationflags=0x08000000)
         print("✅ Cập nhật xong! App sẽ tự khởi động lại...")
-        sys.exit(0)
+        os._exit(0)
 
     except Exception:
         pass  # không có mạng hoặc lỗi → bỏ qua, chạy bình thường
