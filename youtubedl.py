@@ -8,7 +8,7 @@ import urllib.request
 import threading
 
 # ── Version & GitHub ─────────────────────────────────────────────────────────
-APP_VERSION = "1.0.3"
+APP_VERSION = "1.0.4"
 GITHUB_REPO = "Dyreus/youtubeDL"
 GITHUB_API  = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 
@@ -181,7 +181,7 @@ def fetch_title(url):
         "quiet": True,
         "no_warnings": True,
         "skip_download": True,
-        "extractor_args": {"youtube": {"player_client": ["default"]}},
+        "extractor_args": {"youtube": {"player_client": ["android_vr", "android", "tv_embedded"]}},
     }
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
