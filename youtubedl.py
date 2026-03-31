@@ -8,7 +8,7 @@ import urllib.request
 import threading
 
 # ── Version & GitHub ─────────────────────────────────────────────────────────
-APP_VERSION = "1.0.4"
+APP_VERSION = "1.0.5"
 GITHUB_REPO = "Dyreus/youtubeDL"
 GITHUB_API  = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 
@@ -138,7 +138,7 @@ def base_opts():
         "buffersize": 1024 * 16,
         "http_chunk_size": 1024 * 1024 * 10,
     }
-    opts["extractor_args"] = {"youtube": {"player_client": ["default"]}}
+    opts["extractor_args"] = {"youtube": {"player_client": ["android_vr", "android", "tv_embedded"]}}
     if FFMPEG_PATH:
         opts["ffmpeg_location"] = os.path.dirname(FFMPEG_PATH) if os.path.isfile(FFMPEG_PATH) else None
     return opts
