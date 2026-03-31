@@ -8,7 +8,7 @@ import urllib.request
 import threading
 
 # ── Version & GitHub ─────────────────────────────────────────────────────────
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 GITHUB_REPO = "Dyreus/youtubeDL"
 GITHUB_API  = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 
@@ -174,8 +174,14 @@ def download_audio(url, folder):
 
 # ── Fetch tên video từ link ──────────────────────────────────────────────────
 def fetch_title(url):
+    opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "extractor_args": {"youtube": {"player_client": ["default"]}},
+    }
     try:
-        with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True, "skip_download": True}) as ydl:
+        with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
             return info.get("title", url)
     except Exception:
