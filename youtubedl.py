@@ -8,13 +8,16 @@ import urllib.request
 import threading
 
 # ── Version & GitHub ─────────────────────────────────────────────────────────
-APP_VERSION = "1.0.2"
+APP_VERSION = "1.0.3"
 GITHUB_REPO = "Dyreus/youtubeDL"
 GITHUB_API  = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 
 # ── Thư mục gốc của app ──────────────────────────────────────────────────────
 APP_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
 APP_EXE = os.path.abspath(sys.argv[0])
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 def cls():
     os.system("cls" if os.name == "nt" else "clear")
