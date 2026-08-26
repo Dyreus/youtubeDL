@@ -8,9 +8,25 @@ import urllib.request
 import threading
 
 # ── Version & GitHub ─────────────────────────────────────────────────────────
-APP_VERSION = "1.0.5"
+APP_VERSION = "1.0.6"
 GITHUB_REPO = "Dyreus/youtubeDL"
 GITHUB_API  = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+
+# Trạng thái cập nhật, hiển thị ở menu chính
+UPDATE_STATUS = "Đang kiểm tra bản mới..."
+
+def parse_version(v):
+    """'1.0.10' -> (1, 0, 10). So sánh bằng số, KHÔNG so sánh chuỗi."""
+    parts = []
+    for x in str(v).strip().lstrip("v").split("."):
+        num = ""
+        for ch in x:
+            if ch.isdigit():
+                num += ch
+            else:
+                break
+        parts.append(int(num) if num else 0)
+    return tuple(parts)
 
 # ── Thư mục gốc của app ──────────────────────────────────────────────────────
 APP_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -35,14 +51,17 @@ import yt_dlp
 
 # ── Tự động cập nhật app qua GitHub Releases ────────────────────────────────
 def check_app_update():
+    global UPDATE_STATUS
     if not getattr(sys, "frozen", False):
+        UPDATE_STATUS = "chạy từ source (không tự cập nhật)"
         return  # chỉ update khi chạy exe
     try:
         req = urllib.request.Request(GITHUB_API, headers={"User-Agent": "YouTubeDL-Updater"})
         with urllib.request.urlopen(req, timeout=5) as r:
             data = json.loads(r.read())
         latest = data["tag_name"].lstrip("v")
-        if latest <= APP_VERSION:
+        if parse_version(latest) <= parse_version(APP_VERSION):
+            UPDATE_STATUS = "đã là bản mới nhất"
             return  # đã là bản mới nhất
 
         # Tìm file exe trong release assets
@@ -52,6 +71,7 @@ def check_app_update():
                 asset_url = asset["browser_download_url"]
                 break
         if not asset_url:
+            UPDATE_STATUS = f"có v{latest} nhưng thiếu file .exe trong release"
             return
 
         print(f"🆕 Có bản mới: v{latest} (hiện tại: v{APP_VERSION})")
@@ -73,8 +93,9 @@ del "%~f0"
         print("✅ Cập nhật xong! App sẽ tự khởi động lại...")
         os._exit(0)
 
-    except Exception:
-        pass  # không có mạng hoặc lỗi → bỏ qua, chạy bình thường
+    except Exception as e:
+        # Không có mạng hoặc lỗi → vẫn chạy bình thường, nhưng cho biết lý do
+        UPDATE_STATUS = f"không kiểm tra được bản mới ({type(e).__name__})"
 
 # Chạy update ngầm, không block khởi động
 threading.Thread(target=check_app_update, daemon=True).start()
@@ -88,9 +109,9 @@ def ensure_ytdlp():
                 ydl.update_self(to_screen=False, use_updater=True)
         except Exception:
             pass
-    else:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-U", "yt-dlp", "-q"],
-                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # Chạy từ source: KHÔNG tự pip install. Cài ngầm lúc app đang dùng yt_dlp
+    # sẽ phá vỡ package giữa phiên (ModuleNotFoundError: yt_dlp.utils).
+    # Muốn cập nhật thủ công: python -m pip install -U yt-dlp
 
 threading.Thread(target=ensure_ytdlp, daemon=True).start()
 
@@ -138,7 +159,6 @@ def base_opts():
         "buffersize": 1024 * 16,
         "http_chunk_size": 1024 * 1024 * 10,
     }
-    opts["extractor_args"] = {"youtube": {"player_client": ["android_vr", "android", "tv_embedded"]}}
     if FFMPEG_PATH:
         opts["ffmpeg_location"] = os.path.dirname(FFMPEG_PATH) if os.path.isfile(FFMPEG_PATH) else None
     return opts
@@ -181,7 +201,6 @@ def fetch_title(url):
         "quiet": True,
         "no_warnings": True,
         "skip_download": True,
-        "extractor_args": {"youtube": {"player_client": ["android_vr", "android", "tv_embedded"]}},
     }
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -273,9 +292,12 @@ def change_folder(config, key):
 # ── Main ─────────────────────────────────────────────────────────────────────
 def show_main_menu(config):
     cls()
-    print("=" * 40)
-    print(f"   YouTube Downloader  v{APP_VERSION}")
-    print("=" * 40)
+    # Đặt tiêu đề cửa sổ bằng escape sequence (không nháy cmd như os.system)
+    print(f"]0;YouTubeDL v{APP_VERSION}", end="", flush=True)
+    print("=" * 46)
+    print(f"   YouTube Downloader   ●  PHIÊN BẢN v{APP_VERSION}")
+    print(f"   Cập nhật: {UPDATE_STATUS}")
+    print("=" * 46)
     print(f"  1. Tải video  (MP4)  →  {config['video_folder']}")
     print(f"  2. Tải âm thanh (M4A) →  {config['audio_folder']}")
     print(f"  3. Đổi đường dẫn lưu video")
